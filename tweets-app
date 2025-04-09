@@ -1,0 +1,49 @@
+# streamlit_app.py
+
+import streamlit as st
+import pandas as pd
+import plotly.express as px
+import seaborn as sns
+import matplotlib.pyplot as plt
+
+# Set the page config
+st.set_page_config(page_title="Airline Tweet Sentiment", layout="wide")
+
+st.title("✈️ Airline Tweet Sentiment Analysis")
+
+# Load data
+@st.cache_data
+def load_data():
+    url = "https://raw.githubusercontent.com/srinivaschary98/sc-tweets/refs/heads/main/Tweets.csv"
+    return pd.read_csv(url)
+
+tweets = load_data()
+
+# Show raw data (optional)
+if st.checkbox("Show raw data"):
+    st.subheader("Raw Tweet Data")
+    st.write(tweets.head())
+
+# Sentiment Pie Chart
+st.subheader("📊 Tweet Sentiment Distribution")
+
+sentiment_counts = tweets['airline_sentiment'].value_counts().reset_index()
+sentiment_counts.columns = ['sentiment', 'count']
+
+fig_pie = px.pie(sentiment_counts, values='count', names='sentiment',
+                 title='Count of Tweets by Sentiment', color_discrete_sequence=px.colors.qualitative.Pastel)
+st.plotly_chart(fig_pie, use_container_width=True)
+
+# Bar Chart of Tweets per Airline
+st.subheader("📈 Tweet Count per Airline")
+
+airlines_counts = tweets['airline'].value_counts().reset_index()
+airlines_counts.columns = ['airline', 'count']
+
+fig, ax = plt.subplots(figsize=(10, 6))
+sns.barplot(x='airline', y='count', palette='pastel', data=airlines_counts, ax=ax)
+ax.set_title('Count of Tweets by Airline')
+ax.set_xlabel('Airline')
+ax.set_ylabel('Count')
+
+st.pyplot(fig)
